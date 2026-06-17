@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetVibe | פלטפורמת ערוצי הוואטסאפ המובילה</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Assistant', 'Heebo', sans-serif;
+            background: radial-gradient(circle at top right, #f0fdf4 0%, #f8fafc 40%, #ffffff 100%);
+        }
+        .page {
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 20px;
+        }
+        .star-rating i {
+            transition: transform 0.2s;
+        }
+        .star-rating i:hover {
+            transform: scale(1.2);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <div class="h-1.5 w-full bg-gradient-to-r from-emerald-400 via-teal-500 to-emerald-600"></div>
+
+    <header class="glass border-b border-slate-100 sticky top-0 z-50 px-4 lg:px-8 py-3.5 shadow-xs">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="handleAdminAccessRequest()" id="nav-admin-btn" class="text-slate-600 hover:text-emerald-600 px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer hover:bg-slate-50">
+                    <i class="fa-solid fa-lock text-base"></i> פאנל ניהול
+                </button>
+                <button onclick="switchPage('home')" id="nav-home-btn" class="hidden text-slate-600 hover:text-emerald-600 px-3 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer hover:bg-slate-50">
+                    <i class="fa-solid fa-house text-base"></i> חזרה לבית
+                </button>
+                <div id="user-profile-badge" class="hidden flex items-center gap-2 bg-slate-100 pl-3 pr-1.5 py-1 rounded-xl text-xs font-bold text-slate-700">
+                    <img id="user-avatar-img" src="" class="w-6 h-6 rounded-full border border-slate-200">
+                    <span id="user-display-name">משתמש</span>
+                    <button onclick="window.handleFirebaseLogout()" class="text-slate-400 hover:text-red-500 mr-1 transition-colors cursor-pointer" title="התנתק"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
+                <button onclick="handleCreateChannelRequest()" class="bg-gradient-to-br from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-plus text-xs"></i> פרסום ערוץ
+                </button>
+            </div>
+            
+            <div onclick="switchPage('home')" class="flex items-center gap-2.5 cursor-pointer group">
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white w-9 h-9 rounded-xl flex items-center justify-center font-black text-xl shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </div>
+                <span class="text-2xl font-black tracking-tight text-slate-900 group-hover:text-emerald-600 transition-colors">NetVibe</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="loading-overlay" class="fixed inset-0 bg-white/80 backdrop-blur-md z-50 flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="w-12 h-12 border-4 border-slate-200 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+        <p class="text-slate-600 font-bold text-sm">אנא המתן...</p>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-12 flex-grow w-full">
+
+        <div id="page-home" class="page active">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-bold mb-6 shadow-xs">
+                    <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <i class="fa-solid fa-bolt text-[11px]"></i> מרכז ערוצי הוואטסאפ הגדול והאיכותי ביותר
+                </div>
+                <h1 class="text-4xl lg:text-6xl font-black text-slate-900 leading-tight tracking-tight mb-4">
+                    מצא את ערוץ הוואטסאפ <br><span class="gradient-text">הבא שלך</span>
+                </h1>
+                <p class="text-slate-500 text-base lg:text-lg font-medium max-w-2xl mx-auto leading-relaxed">
+                    גלשו בספרייה הקהילתית הגדולה, קראו ביקורות אותנטיות של משתמשים והצטרפו ישירות בלחיצת כפתור אחת.
+                </p>
+            </div>
+
+            <div class="max-w-2xl mx-auto mb-12">
+                <div class="relative shadow-xl shadow-slate-100 rounded-2xl bg-white border border-slate-100 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all p-1 flex items-center">
+                    <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-slate-400 text-lg">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <input type="text" id="home-search-input" oninput="filterChannels()" placeholder="חפשו שם ערוץ, תיאור או קטגוריה..." class="w-full pr-12 pl-4 py-3.5 bg-transparent text-slate-700 font-medium focus:outline-hidden text-base">
+                </div>
+            </div>
+
+            <div class="relative mb-12">
+                <div id="category-filter-list" class="flex items-center gap-2.5 overflow-x-auto pb-3 custom-scrollbar justify-start lg:justify-center">
+                    <button onclick="selectCategory('all')" data-cat="all" class="cat-btn bg-emerald-600 text-white shadow-md shadow-emerald-600/20 px-5 py-2 rounded-xl text-sm font-bold shrink-0 cursor-pointer transition-all">🔥 הכל</button>
+                    <button onclick="selectCategory('חדשות')" data-cat="חדשות" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-newspaper text-slate-400 text-xs"></i> חדשות</button>
+                    <button onclick="selectCategory('טכנולוגיה')" data-cat="טכנולוגיה" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-laptop text-slate-400 text-xs"></i> טכנולוגיה</button>
+                    <button onclick="selectCategory('ספורט')" data-cat="ספורט" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-earth-americas text-slate-400 text-xs"></i> ספורט</button>
+                    <button onclick="selectCategory('בידור')" data-cat="בידור" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-clapperboard text-slate-400 text-xs"></i> בידור</button>
+                    <button onclick="selectCategory('עסקים')" data-cat="עסקים" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 text-xs"></i> פיננסים ועסקים</button>
+                    <button onclick="selectCategory('אוכל')" data-cat="אוכל" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-pizza-slice text-slate-400 text-xs"></i> אוכל ובישול</button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mb-8 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-1.5 h-7 bg-emerald-500 rounded-full"></div>
+                    <h2 class="text-2xl font-black text-slate-900">ערוצים מומלצים בקהילה</h2>
+                    <span id="channels-count-badge" class="bg-slate-100 text-slate-500 text-xs px-2.5 py-1 rounded-md font-bold">0</span>
+                </div>
+            </div>
+
+            <div id="channels-main-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            
+            <div id="channels-empty-state" class="hidden text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl max-w-md mx-auto mt-8">
+                <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-folder-open"></i></div>
+                <h3 class="font-bold text-slate-800 text-lg mb-1">לא נמצאו ערוצים מתאימים</h3>
+                <p class="text-slate-400 text-sm max-w-xs mx-auto">נסו לשנות את מילת החיפוש או לבחור קטגוריה אחרת מהרשימה.</p>
+            </div>
+        </div>
+
+
+        <div id="page-detail" class="page">
+            <div class="mb-8">
+                <button onclick="switchPage('home')" class="text-slate-500 hover:text-slate-900 text-sm font-bold flex items-center gap-2 group cursor-pointer">
+                    <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i> חזרה לכל הערוצים
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white border border-slate-100 rounded-2xl p-6 lg:p-8 shadow-sm relative overflow-hidden">
+                        <div id="detail-category-badge" class="absolute top-6 left-6 text-xs font-bold px-3 py-1.5 rounded-xl"></div>
+                        
+                        <div class="flex items-start gap-5">
+                            <div id="detail-avatar" class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-md shrink-0"></div>
+                            <div>
+                                <h1 id="detail-title" class="text-2xl lg:text-3xl font-black text-slate-900 mb-1.5"></h1>
+                                <div class="flex items-center gap-3">
+                                    <div id="detail-stars" class="flex items-center gap-1 text-amber-400 text-sm"></div>
+                                    <span id="detail-rating-text" class="text-slate-500 text-xs font-bold"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-6 border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-400 tracking-wider uppercase mb-3">אודות הערוץ</h3>
+                        <p id="detail-description" class="text-slate-600 text-base leading-relaxed whitespace-pre-wrap"></p>
+                        
+                        <div class="mt-8">
+                            <a id="detail-join-href" href="#" target="_blank" class="w-full sm:w-auto inline-flex bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black px-8 py-4 rounded-xl items-center justify-center gap-3 shadow-lg shadow-emerald-500/20 transition-all text-base transform hover:-translate-y-0.5">
+                                <i class="fa-brands fa-whatsapp text-xl"></i> התחברות לערוץ הוואטסאפ
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-100 rounded-2xl p-6 lg:p-8 shadow-sm">
+                        <div class="flex items-center gap-2 mb-6 border-r-4 border-emerald-500 pr-3">
+                            <h2 class="text-lg font-black text-slate-900">ביקורות וחוות דעת של הקהילה</h2>
+                            <span id="detail-reviews-count" class="bg-slate-50 text-slate-500 text-xs font-bold px-2 py-0.5 rounded-md">0</span>
+                        </div>
+
+                        <div id="detail-reviews-list-container" class="space-y-4 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm sticky top-24">
+                    <h3 class="font-black text-slate-900 text-lg mb-1">כתיבת ביקורת</h3>
+                    <p class="text-slate-400 text-xs font-medium mb-5">שתפו את החוות דעת והניסיון שלכם מהערוץ הזה</p>
+
+                    <form id="add-review-form" onsubmit="handleReviewSubmit(event)" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-slate-700 font-bold text-xs mb-1.5">השם שלכם</label>
+                            <input type="text" id="review-user-name" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed font-semibold">
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-700 font-bold text-xs mb-1">דירוג כוכבים *</label>
+                            <div class="flex flex-row-reverse items-center justify-end gap-1.5 text-2xl text-slate-200 star-rating mt-1">
+                                <input type="radio" name="rating-stars" value="5" id="st-5" class="hidden peer" checked><label for="st-5" class="cursor-pointer peer-hover:text-amber-400 peer-checked:text-amber-400"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" name="rating-stars" value="4" id="st-4" class="hidden peer"><label for="st-4" class="cursor-pointer peer-hover:text-amber-400 peer-checked:text-amber-400"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" name="rating-stars" value="3" id="st-3" class="hidden peer"><label for="st-3" class="cursor-pointer peer-hover:text-amber-400 peer-checked:text-amber-400"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" name="rating-stars" value="2" id="st-2" class="hidden peer"><label for="st-2" class="cursor-pointer peer-hover:text-amber-400 peer-checked:text-amber-400"><i class="fa-solid fa-star"></i></label>
+                                <input type="radio" name="rating-stars" value="1" id="st-1" class="hidden peer"><label for="st-1" class="cursor-pointer peer-hover:text-amber-400 peer-checked:text-amber-400"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-slate-700 font-bold text-xs mb-1.5">תוכן הביקורת *</label>
+                            <textarea id="review-content" required rows="4" placeholder="כתבו כאן מה אתם חושבים על הערוץ..." class="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-slate-900 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors shadow-xs mt-2 cursor-pointer">
+                            <i class="fa-solid fa-paper-plane text-xs"></i> פרסום חוות דעת
+                        </button>
+                    </form>
+
+                    <div id="review-login-prompt" class="text-center py-6 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 px-4">
+                        <i class="fa-solid fa-user-lock text-slate-300 text-2xl block mb-2"></i>
+                        <p class="text-slate-600 font-bold text-xs mb-3">יש להתחבר כדי להוסיף ביקורת ערוץ</p>
+                        <button onclick="window.triggerGoogleLogin()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 mx-auto shadow-2xs cursor-pointer transition-all">
+                            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4"> התחברות מהירה עם Google
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="page-submit" class="page">
+            <div class="mb-6">
+                <button onclick="switchPage('home')" class="text-slate-500 hover:text-slate-900 text-sm font-bold flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-arrow-right"></i> ביטול וחזרה לספרייה
+                </button>
+            </div>
+
+            <div class="text-center max-w-md mx-auto mb-10">
+                <h1 class="text-3xl font-black text-slate-900 mb-2">פרסום ערוץ וואטסאפ</h1>
+                <p class="text-slate-400 text-sm font-medium">מלאו את הפרטים מטה כדי להוסיף את הערוץ שלכם לספרייה הציבורית</p>
+            </div>
+
+            <div class="max-w-2xl mx-auto bg-white border border-slate-100 rounded-2xl p-6 lg:p-8 shadow-xl shadow-slate-100/50">
+                <form id="create-channel-form" onsubmit="handleChannelSubmit(event)" class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-slate-700 font-bold text-sm mb-2">שם הערוץ *</label>
+                            <input type="text" id="form-title" required placeholder="לדוגמה: עולם הבישול והמאפים" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block text-slate-700 font-bold text-sm mb-2">קטגוריה *</label>
+                            <select id="form-category" required class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-600 appearance-none bg-no-repeat bg-[left_1rem_center]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22292.4%22 height=%22292.4%22><path fill=%22%236b7280%22 d=%22M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.5-12.8z%22/></svg>'); background-size: .65em auto;">
+                                <option value="" disabled selected>בחרו קטגוריה</option>
+                                <option value="חדשות">חדשות</option>
+                                <option value="טכנולוגיה">טכנולוגיה</option>
+                                <option value="ספורט">ספורט</option>
+                                <option value="בידור">בידור</option>
+                                <option value="עסקים">פיננסים ועסקים</option>
+                                <option value="אוכל">אוכל ובישול</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-bold text-sm mb-2">קישור ציבורי ישיר לערוץ הוואטסאפ *</label>
+                        <input type="url" id="form-url" required placeholder="https://whatsapp.com/channel/..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800 text-left" dir="ltr">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-bold text-sm mb-2">תיאור ותוכן הערוץ *</label>
+                        <textarea id="form-description" required rows="4" placeholder="תארו כאן בקצרה מה מפורסם בערוץ שלכם כדי למשוך עוקבים חדשים..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 mt-4 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> פרסום הערוץ למערכת
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+        <div id="page-admin" class="page">
+            <div class="mb-6">
+                <button onclick="switchPage('home')" class="text-slate-500 hover:text-slate-900 text-sm font-bold flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-arrow-right"></i> חזרה לממשק המשתמשים
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-5 mb-10">
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs">
+                    <div class="bg-emerald-50 text-emerald-600 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-xs"><i class="fa-solid fa-hashtag"></i></div>
+                    <div class="text-left">
+                        <span class="text-slate-400 text-xs block font-bold mb-0.5">סך הכל ערוצים</span>
+                        <span id="admin-kpi-channels" class="text-3xl font-black text-slate-800">0</span>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs">
+                    <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-xs"><i class="fa-solid fa-comments"></i></div>
+                    <div class="text-left">
+                        <span class="text-slate-400 text-xs block font-bold mb-0.5">חוות דעת וביקורות</span>
+                        <span id="admin-kpi-reviews" class="text-3xl font-black text-slate-800">0</span>
+                    </div>
+                </div>
+                <div class="bg-white border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs col-span-2 lg:col-span-1">
+                    <div class="bg-amber-50 text-amber-600 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-xs"><i class="fa-solid fa-star-half-stroke"></i></div>
+                    <div class="text-left">
+                        <span class="text-slate-400 text-xs block font-bold mb-0.5">ממוצע דירוג כללי</span>
+                        <span id="admin-kpi-avg" class="text-3xl font-black text-slate-800">0.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs">
+                <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+                    <h3 class="font-black text-slate-900 text-lg">ניהול תוכן ובקרת ערוצי המערכת</h3>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse text-sm">
+                        <thead>
+                            <tr class="text-slate-400 font-bold border-b border-slate-100">
+                                <th class="pb-3 pr-2">ערוץ</th>
+                                <th class="pb-3">קטגוריה</th>
+                                <th class="pb-3">דירוג ממוצע</th>
+                                <th class="pb-3 text-center">פעולות ניהול</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-tbody" class="divide-y divide-slate-50 font-medium text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-100 py-6 text-center text-slate-400 text-xs font-bold mt-auto">
+        &copy; 2026 NetVibe Platform Enterprise Dev System. כל הזכויות שמורות.
+    </footer>
+
+    <script type="module">
+        // Import Module Firebase Libraries
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyA4yO8CW2qI0T4l5GHnb4_akld7D10B8J0",
+          authDomain: "netvibe-6e6bf.firebaseapp.com",
+          projectId: "netvibe-6e6bf",
+          storageBucket: "netvibe-6e6bf.firebasestorage.app",
+          messagingSenderId: "520178061595",
+          appId: "1:520178061595:web:afd73a13936d76290583be",
+          measurementId: "G-GLH71SSZ98"
+        };
+
+        // Initialize Native Instances
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Admin Configuration Pointer Matrix
+        const ADMIN_UID_TARGET = "qRnHAa4n28f5tl1ozTK5em06WGK2";
+
+        // Stateful Runtime Cache Pointers
+        let channelsDataCache = [];
+        let reviewsDataCache = [];
+        let activeSelectedChannelId = null;
+        let activeSelectedCategoryFilter = 'all';
+        let currentUser = null;
+
+        // Styling Themes Mapping
+        const categoryThemes = {
+            'חדשות': { bg: 'bg-slate-50', text: 'text-slate-700', badge: 'bg-slate-100 text-slate-700', icon: 'fa-newspaper' },
+            'טכנולוגיה': { bg: 'bg-indigo-50', text: 'text-indigo-700', badge: 'bg-indigo-100 text-indigo-700', icon: 'fa-laptop' },
+            'ספורט': { bg: 'bg-blue-50', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700', icon: 'fa-earth-americas' },
+            'בידור': { bg: 'bg-purple-50', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', icon: 'fa-clapperboard' },
+            'עסקים': { bg: 'bg-amber-50', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', icon: 'fa-briefcase' },
+            'אוכל': { bg: 'bg-orange-50', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-700', icon: 'fa-pizza-slice' }
+        };
+        const defaultTheme = { bg: 'bg-emerald-50', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', icon: 'fa-hashtag' };
+
+        // Realtime Data Sync Event Listeners Pipeline
+        function initRealtimeSyncPipelines() {
+            onSnapshot(collection(db, "channels"), (channelsSnapshot) => {
+                channelsDataCache = [];
+                channelsSnapshot.forEach((doc) => {
+                    channelsDataCache.push({ id: doc.id, ...doc.data() });
+                });
+                
+                onSnapshot(query(collection(db, "reviews"), orderBy("timestamp", "desc")), (reviewsSnapshot) => {
+                    reviewsDataCache = [];
+                    reviewsSnapshot.forEach((doc) => {
+                        reviewsDataCache.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    calculateAggregatedMetricsAndRender();
+                    hideLoadingScreenOverlaySpinner();
+                }, (err) => hideLoadingScreenOverlaySpinner());
+            }, (err) => hideLoadingScreenOverlaySpinner());
+        }
+
+        // Monitoring Authentication State Changes Engine Lifecycle
+        function initAuthenticationStateMonitor() {
+            onAuthStateChanged(auth, (user) => {
+                const navAdminBtn = document.getElementById('nav-admin-btn');
+                const profileContainer = document.getElementById('user-profile-badge');
+                const reviewForm = document.getElementById('add-review-form');
+                const reviewPrompt = document.getElementById('review-login-prompt');
+                const reviewNameInput = document.getElementById('review-user-name');
+                
+                currentUser = user;
+
+                if (user) {
+                    // User is signed in (General User or Admin)
+                    document.getElementById('user-avatar-img').src = user.photoURL || '';
+                    document.getElementById('user-display-name').innerText = user.uid === ADMIN_UID_TARGET ? 'מנהל' : (user.displayName || 'משתמש');
+                    profileContainer.classList.remove('hidden');
+
+                    // Adjust state for review form
+                    if(reviewNameInput) reviewNameInput.value = user.displayName || 'משתמש אנונימי';
+                    if(reviewForm) reviewForm.classList.remove('hidden');
+                    if(reviewPrompt) reviewPrompt.classList.add('hidden');
+
+                    if (user.uid === ADMIN_UID_TARGET) {
+                        navAdminBtn.innerHTML = `<i class="fa-solid fa-chart-pie text-base"></i> פאנל ניהול`;
+                    } else {
+                        navAdminBtn.innerHTML = `<i class="fa-solid fa-lock text-base"></i> פאנל ניהול`;
+                    }
+                } else {
+                    // Not logged in at all
+                    profileContainer.classList.add('hidden');
+                    navAdminBtn.innerHTML = `<i class="fa-solid fa-lock text-base"></i> פאנל ניהול`;
+                    
+                    // Toggle review view back to prompt
+                    if(reviewForm) reviewForm.classList.add('hidden');
+                    if(reviewPrompt) reviewPrompt.classList.remove('hidden');
+
+                    // Force kick-out if user is currently inside the admin panel page layout
+                    const activePage = document.querySelector('.page.active');
+                    if (activePage && activePage.id === 'page-admin') {
+                        switchPage('home');
+                    }
+                }
+            });
+        }
+
+        // Direct Login Trigger for reviews or actions
+        window.triggerGoogleLogin = async function() {
+            try {
+                showLoadingScreenOverlaySpinner();
+                await signInWithPopup(auth, googleProvider);
+            } catch(err) {
+                alert("שגיאה בתהליך ההתחברות: " + err.message);
+            } finally {
+                hideLoadingScreenOverlaySpinner();
+            }
+        };
+
+        // Interactive Trigger Logic Entry Point Click Request Pipeline Button Auth Hook
+        window.handleAdminAccessRequest = async function() {
+            if (currentUser && currentUser.uid === ADMIN_UID_TARGET) {
+                switchPage('admin');
+                return;
+            }
+
+            if(confirm("כדי להיכנס לפאנל הניהול, עליך להתחבר באמצעות חשבון הגוגל של האדמין המורשה.")) {
+                try {
+                    showLoadingScreenOverlaySpinner();
+                    const result = await signInWithPopup(auth, googleProvider);
+                    
+                    if(result.user.uid === ADMIN_UID_TARGET) {
+                        switchPage('admin');
+                    } else {
+                        alert("גישה נדחתה. חשבון הגוגל הזה אינו מוגדר כמנהל המערכת.");
+                        // Keep user logged in but don't grant admin page entry
+                    }
+                } catch(err) {
+                    alert("שגיאה בתהליך ההתחברות: " + err.message);
+                } finally {
+                    hideLoadingScreenOverlaySpinner();
+                }
+            }
+        };
+
+        window.handleCreateChannelRequest = async function() {
+            if (currentUser) {
+                switchPage('submit');
+            } else {
+                if(confirm("כדי לפרסם ערוץ חדש בספרייה, עליך להתחבר תחילה עם חשבון גוגל.")) {
+                    await window.triggerGoogleLogin();
+                    if(auth.currentUser) {
+                        switchPage('submit');
+                    }
+                }
+            }
+        };
+
+        window.handleFirebaseLogout = async function() {
+            if(confirm("האם ברצונך להתנתק מהחשבון?")) {
+                try {
+                    showLoadingScreenOverlaySpinner();
+                    await signOut(auth);
+                    switchPage('home');
+                } catch(err) {
+                    alert("שגיאה בתהליך ההתנתקות");
+                } finally {
+                    hideLoadingScreenOverlaySpinner();
+                }
+            }
+        };
+
+        function hideLoadingScreenOverlaySpinner() {
+            document.getElementById('loading-overlay').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function showLoadingScreenOverlaySpinner() {
+            document.getElementById('loading-overlay').classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function calculateAggregatedMetricsAndRender() {
+            channelsDataCache = channelsDataCache.map(channel => {
+                const matchedReviews = reviewsDataCache.filter(r => r.channelId === channel.id);
+                const count = matchedReviews.length;
+                const sum = matchedReviews.reduce((acc, curr) => acc + curr.rating, 0);
+                const avg = count > 0 ? parseFloat((sum / count).toFixed(1)) : 0.0;
+                return { ...channel, reviewCount: count, averageRating: avg };
+            });
+
+            renderMainChannelsGridDisplayItems();
+            renderAdminDashboardLayoutViewControlPanel();
+            
+            if (activeSelectedChannelId) {
+                renderSpecificChannelDetailPageContext(activeSelectedChannelId);
+            }
+        }
+
+        window.renderMainChannelsGridDisplayItems = function() {
+            const grid = document.getElementById('channels-main-grid');
+            const searchKeyword = document.getElementById('home-search-input').value.trim().toLowerCase();
+            
+            grid.innerHTML = '';
+            
+            const filtered = channelsDataCache.filter(item => {
+                const matchesCategory = (activeSelectedCategoryFilter === 'all' || item.category === activeSelectedCategoryFilter);
+                const matchesSearch = (!searchKeyword || 
+                    item.title.toLowerCase().includes(searchKeyword) || 
+                    item.description.toLowerCase().includes(searchKeyword) || 
+                    item.category.toLowerCase().includes(searchKeyword)
+                );
+                return matchesCategory && matchesSearch;
+            });
+
+            document.getElementById('channels-count-badge').innerText = filtered.length;
+
+            if(filtered.length === 0) {
+                document.getElementById('channels-empty-state').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('channels-empty-state').classList.add('hidden');
+
+            filtered.forEach(ch => {
+                const uiTheme = categoryThemes[ch.category] || defaultTheme;
+                const starsHtml = renderStarsHelperUIElement(ch.averageRating);
+                
+                const card = document.createElement('div');
+                card.className = "bg-white border border-slate-100 hover:border-emerald-500 rounded-2xl p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex gap-4 items-start relative group cursor-pointer transform hover:-translate-y-0.5";
+                card.onclick = () => window.navigateToChannelDetailsViewPage(ch.id);
+                
+                card.innerHTML = `
+                    <div class="${uiTheme.bg} ${uiTheme.text} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                        <i class="fa-solid ${uiTheme.icon}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <h3 class="font-extrabold text-slate-900 text-base group-hover:text-emerald-600 transition-colors truncate">${ch.title}</h3>
+                            <span class="${uiTheme.badge} text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0">${ch.category}</span>
+                        </div>
+                        <p class="text-slate-400 text-xs font-medium leading-relaxed line-clamp-2 mb-4 pl-2">${ch.description}</p>
+                        <div class="flex items-center justify-between text-xs font-bold text-slate-400 pt-1 border-t border-slate-50">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-comments text-slate-300 text-[11px]"></i> ${ch.reviewCount} ביקורות</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-amber-400 font-bold bg-amber-50/50 px-2 py-0.5 rounded-md">
+                                ${ch.averageRating > 0 ? `${ch.averageRating} ${starsHtml}` : `<span class="text-slate-400 text-[10px]">אין דירוג</span>`}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        };
+
+        function renderAdminDashboardLayoutViewControlPanel() {
+            const tbody = document.getElementById('admin-table-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+
+            document.getElementById('admin-kpi-channels').innerText = channelsDataCache.length;
+            document.getElementById('admin-kpi-reviews').innerText = reviewsDataCache.length;
+            
+            const totalRatingSum = channelsDataCache.reduce((acc, curr) => acc + curr.averageRating, 0);
+            const globalAvg = channelsDataCache.length > 0 ? (totalRatingSum / channelsDataCache.length).toFixed(1) : "0.0";
+            document.getElementById('admin-kpi-avg').innerText = globalAvg;
+
+            channelsDataCache.forEach(ch => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="py-4 pr-2">
+                        <div class="font-bold text-slate-800">${ch.title}</div>
+                        <div class="text-slate-400 text-xs max-w-xs truncate">${ch.url}</div>
+                    </td>
+                    <td class="py-4 text-slate-500 font-semibold text-xs">${ch.category}</td>
+                    <td class="py-4">
+                        <div class="flex items-center gap-1 text-amber-400 text-xs">
+                            <i class="fa-solid fa-star"></i>
+                            <span class="text-slate-700 font-bold">${ch.averageRating}</span>
+                            <span class="text-slate-400 text-[11px]">(${ch.reviewCount})</span>
+                        </div>
+                    </td>
+                    <td class="py-4 text-center">
+                        <div class="flex items-center justify-center gap-3">
+                            <a href="${ch.url}" target="_blank" class="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-white rounded-lg border border-transparent hover:border-slate-100 transition-all shadow-2xs" title="פתח קישור"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+                            <button onclick="window.handleDeleteChannelDocumentEvent('${ch.id}')" class="text-red-400 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition-all shadow-2xs cursor-pointer" title="מחק ערוץ"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.navigateToChannelDetailsViewPage = function(id) {
+            activeSelectedChannelId = id;
+            renderSpecificChannelDetailPageContext(id);
+            switchPage('detail');
+        };
+
+        function renderSpecificChannelDetailPageContext(id) {
+            const ch = channelsDataCache.find(c => c.id === id);
+            if(!ch) return;
+
+            const uiTheme = categoryThemes[ch.category] || defaultTheme;
+            
+            document.getElementById('detail-title').innerText = ch.title;
+            document.getElementById('detail-description').innerText = ch.description;
+            document.getElementById('detail-join-href').href = ch.url;
+            
+            const badge = document.getElementById('detail-category-badge');
+            badge.innerText = ch.category;
+            badge.className = `absolute top-6 left-6 text-xs font-bold px-3 py-1.5 rounded-xl ${uiTheme.badge}`;
+            
+            const avatar = document.getElementById('detail-avatar');
+            avatar.className = `w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-md shrink-0 ${uiTheme.bg} ${uiTheme.text}`;
+            avatar.innerHTML = `<i class="fa-solid ${uiTheme.icon}"></i>`;
+
+            document.getElementById('detail-stars').innerHTML = renderStarsHelperUIElement(ch.averageRating);
+            document.getElementById('detail-rating-text').innerText = ch.averageRating > 0 ? `${ch.averageRating} מתוך 5 (${ch.reviewCount} ביקורות)` : "טרם דורג";
+            
+            const matchedReviews = reviewsDataCache.filter(r => r.channelId === id);
+            const container = document.getElementById('detail-reviews-list-container');
+            document.getElementById('detail-reviews-count').innerText = matchedReviews.length;
+            
+            container.innerHTML = '';
+            if(matchedReviews.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-400 font-medium text-xs">
+                        <i class="fa-solid fa-comments text-lg block mb-2 text-slate-200"></i>
+                        אין עדיין ביקורות לערוץ זה. היו הראשונים לכתוב!
+                    </div>
+                `;
+                return;
+            }
+
+            matchedReviews.forEach(rev => {
+                const dateText = rev.timestamp ? new Date(rev.timestamp).toLocaleDateString('he-IL', {day: 'numeric', month: 'short', year: 'numeric'}) : '';
+                const item = document.createElement('div');
+                item.className = "bg-slate-50/70 border border-slate-100 rounded-xl p-4 space-y-2";
+                item.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 bg-slate-200 text-slate-600 font-bold rounded-full flex items-center justify-center text-[11px]">${rev.userName ? rev.userName.charAt(0) : 'U'}</div>
+                            <span class="font-bold text-slate-800 text-sm">${rev.userName || 'משתמש'}</span>
+                        </div>
+                        <span class="text-slate-400 text-[10px] font-semibold">${dateText}</span>
+                    </div>
+                    <div class="text-amber-400 text-xs">${renderStarsHelperUIElement(rev.rating)}</div>
+                    <p class="text-slate-600 text-xs font-medium leading-relaxed">${rev.content}</p>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderStarsHelperUIElement(rating) {
+            let html = '';
+            const floor = Math.floor(rating);
+            for(let i=1; i<=5; i++) {
+                if(i <= floor) {
+                    html += '<i class="fa-solid fa-star"></i>';
+                } else if(i - 0.5 <= rating) {
+                    html += '<i class="fa-solid fa-star-half-stroke"></i>';
+                } else {
+                    html += '<i class="fa-regular fa-star text-slate-200"></i>';
+                }
+            }
+            return html;
+        }
