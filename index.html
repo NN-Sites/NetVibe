@@ -155,9 +155,14 @@
                     <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i> חזרה לכל הערוצים
                 </button>
                 
-                <button id="detail-edit-btn" onclick="openChannelEditMode()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold items-center gap-2 transition-all cursor-pointer">
-                    <i class="fa-solid fa-pen-to-square text-slate-500"></i> עריכת פרטי הערוץ
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="detail-share-btn" onclick="handleShareChannelContext()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer">
+                        <i class="fa-solid fa-share-nodes"></i> <span id="share-btn-text">שיתוף ערוץ</span>
+                    </button>
+                    <button id="detail-edit-btn" onclick="openChannelEditMode()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold items-center gap-2 transition-all cursor-pointer">
+                        <i class="fa-solid fa-pen-to-square text-slate-500"></i> עריכת פרטי הערוץ
+                    </button>
+                </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
@@ -412,6 +417,7 @@
         let activeSelectedCategoryFilter = 'all';
         let currentUser = null;
         let editingChannelId = null;
+        let initialUrlCheckPerformed = false;
 
         const categoryThemes = {
             'גיימינג': { bg: 'bg-indigo-50/70', text: 'text-indigo-600', badge: 'bg-indigo-100 text-indigo-700', icon: 'fa-gamepad' },
@@ -439,9 +445,44 @@
                     
                     calculateAggregatedMetricsAndRender();
                     hideLoadingScreenOverlaySpinner();
+
+                    if (!initialUrlCheckPerformed) {
+                        initialUrlCheckPerformed = true;
+                        checkUrlParametersForDirectRouting();
+                    }
                 }, (err) => hideLoadingScreenOverlaySpinner());
             }, (err) => hideLoadingScreenOverlaySpinner());
         }
+
+        function checkUrlParametersForDirectRouting() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const channelIdFromUrl = urlParams.get('channel');
+            if (channelIdFromUrl) {
+                const targetChannelExists = channelsDataCache.some(c => c.id === channelIdFromUrl);
+                if (targetChannelExists) {
+                    window.navigateToChannelDetailsViewPage(channelIdFromUrl);
+                }
+            }
+        }
+
+        window.addEventListener('popstate', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const channelIdFromUrl = urlParams.get('channel');
+            if (channelIdFromUrl) {
+                if (channelsDataCache.some(c => c.id === channelIdFromUrl)) {
+                    activeSelectedChannelId = channelIdFromUrl;
+                    renderSpecificChannelDetailPageContext(channelIdFromUrl);
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    document.getElementById('page-detail').classList.add('active');
+                    document.getElementById('nav-home-btn').classList.remove('hidden');
+                }
+            } else {
+                activeSelectedChannelId = null;
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                document.getElementById('page-home').classList.add('active');
+                document.getElementById('nav-home-btn').classList.add('hidden');
+            }
+        });
 
         function initAuthenticationStateMonitor() {
             onAuthStateChanged(auth, (user) => {
@@ -487,6 +528,9 @@
             const navHomeBtn = document.getElementById('nav-home-btn');
             if (pageId === 'home') {
                 navHomeBtn.classList.add('hidden');
+                const url = new URL(window.location.href);
+                url.searchParams.delete('channel');
+                window.history.pushState({}, '', url);
             } else {
                 navHomeBtn.classList.remove('hidden');
             }
@@ -703,6 +747,54 @@
             }
         };
 
+        window.handleShareChannelContext = function() {
+            if (!activeSelectedChannelId) return;
+            
+            const shareUrl = `${window.location.origin}${window.location.pathname}?channel=${activeSelectedChannelId}`;
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    toggleShareButtonSuccessStateIndicator();
+                }).catch(() => {
+                    fallbackCopyTextStringToClipboard(shareUrl);
+                });
+            } else {
+                fallbackCopyTextStringToClipboard(shareUrl);
+            }
+        };
+
+        function fallbackCopyTextStringToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                toggleShareButtonSuccessStateIndicator();
+            } catch (err) {
+                alert("לא ניתן היה להעתיק את הקישור, נסה להעתיק ידנית: " + text);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function toggleShareButtonSuccessStateIndicator() {
+            const btnText = document.getElementById('share-btn-text');
+            const btn = document.getElementById('detail-share-btn');
+            if (!btnText || !btn) return;
+
+            btnText.innerText = "הקישור הועתק!";
+            btn.className = "bg-amber-500 text-white px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer";
+            
+            setTimeout(() => {
+                btnText.innerText = "שיתוף ערוץ";
+                btn.className = "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-2 transition-all cursor-pointer";
+            }, 2000);
+        }
+
         function hideLoadingScreenOverlaySpinner() {
             document.getElementById('loading-overlay').classList.add('opacity-0', 'pointer-events-none');
         }
@@ -904,6 +996,11 @@
         window.navigateToChannelDetailsViewPage = function(id) {
             activeSelectedChannelId = id;
             renderSpecificChannelDetailPageContext(id);
+            
+            const url = new URL(window.location.href);
+            url.searchParams.set('channel', id);
+            window.history.pushState({}, '', url);
+
             switchPage('detail');
         };
 
