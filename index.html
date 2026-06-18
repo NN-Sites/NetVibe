@@ -98,9 +98,15 @@
                     גלשו בספרייה הקהילתית הגדולה, קראו ביקורות אותנטיות של משתמשים והצטרפו ישירות בלחיצת כפתור אחת.
                 </p>
                 
-                <button onclick="handleCreateChannelRequest()" class="bg-gradient-to-br from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 text-white px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5">
-                    <i class="fa-solid fa-plus text-xs"></i> פרסום ערוץ משלכם בספרייה
-                </button>
+                <div class="flex flex-col items-center gap-3">
+                    <button onclick="handleCreateChannelRequest()" class="bg-gradient-to-br from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 text-white px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-plus text-xs"></i> פרסום ערוץ משלכם בספרייה
+                    </button>
+                    
+                    <a href="ad.html" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:shadow-lg hover:shadow-orange-500/20 text-white px-6 py-2.5 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-star text-xs"></i> פרסום ממומן במערכת
+                    </a>
+                </div>
             </div>
 
             <div class="max-w-2xl mx-auto mb-12">
@@ -597,7 +603,7 @@
                     window.navigateToChannelDetailsViewPage(updatedId);
                 } else {
                     channelPayload.creatorUid = currentUser.uid;
-                    channelPayload.isSponsored = false; // ברירת מחדל לא ממומן
+                    channelPayload.isSponsored = false;
                     await addDoc(collection(db, "channels"), channelPayload);
                     document.getElementById('create-channel-form').reset();
                     switchPage('home');
@@ -684,7 +690,6 @@
             }
         };
 
-        // פונקציה חדשה להפעלה/כיבוי של קידום ממומן על ידי האדמין
         window.toggleChannelSponsoredStatus = async function(id, currentStatus) {
             try {
                 showLoadingScreenOverlaySpinner();
@@ -720,7 +725,6 @@
                 };
             });
 
-            // מיון: קודם כל ערוצים ממומנים (isSponsored === true), ולאחר מכן לפי כמות ביקורות ודירוג
             channelsDataCache.sort((a, b) => {
                 if (b.isSponsored !== a.isSponsored) {
                     return b.isSponsored ? 1 : -1;
@@ -771,8 +775,6 @@
                 const uiTheme = categoryThemes[ch.category] || defaultTheme;
                 
                 const card = document.createElement('div');
-                
-                // שינוי עיצוב קל למסגרת ממומנת
                 const sponsoredBorderClass = ch.isSponsored ? 'border-amber-400 ring-2 ring-amber-400/10 bg-amber-50/10' : 'border-slate-100 hover:border-emerald-500';
                 
                 card.className = `bg-white border ${sponsoredBorderClass} rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex flex-row sm:flex-col items-center sm:text-center relative group cursor-pointer transform hover:-translate-y-0.5 gap-4 sm:gap-0 sm:aspect-square justify-between overflow-hidden w-full`;
@@ -785,7 +787,6 @@
                     avatarHTML = `<i class="fa-solid ${uiTheme.icon}"></i>`;
                 }
 
-                // תג "ממומן" במידה והערוץ מקודם
                 const sponsoredBadgeHTML = ch.isSponsored ? `<span class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md shrink-0 shadow-2xs">🌟 ממומן</span>` : '';
 
                 card.innerHTML = `
@@ -834,7 +835,6 @@
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors";
                 
-                // הגדרת עיצוב כפתור ממומן באדמין
                 const sponsorBtnClass = ch.isSponsored ? 'bg-amber-500 text-white border-amber-600' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50 border-transparent';
                 const sponsorBtnTitle = ch.isSponsored ? 'הסר מקידום ממומן' : 'הפוך לערוץ ממומן';
 
