@@ -114,6 +114,7 @@
             <div class="relative mb-12">
                 <div id="category-filter-list" class="flex items-center gap-2.5 overflow-x-auto pb-3 custom-scrollbar justify-start lg:justify-center">
                     <button onclick="selectCategory('all')" data-cat="all" class="cat-btn bg-emerald-600 text-white shadow-md shadow-emerald-600/20 px-5 py-2 rounded-xl text-sm font-bold shrink-0 cursor-pointer transition-all">🔥 הכל</button>
+                    <button onclick="selectCategory('גיימינג')" data-cat="גיימינג" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-gamepad text-indigo-500 text-xs"></i> גיימינג ומשחקים</button>
                     <button onclick="selectCategory('חדשות')" data-cat="חדשות" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-newspaper text-slate-400 text-xs"></i> חדשות</button>
                     <button onclick="selectCategory('טכנולוגיה')" data-cat="טכנולוגיה" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-laptop text-slate-400 text-xs"></i> טכנולוגיה</button>
                     <button onclick="selectCategory('ספורט')" data-cat="ספורט" class="cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2"><i class="fa-solid fa-earth-americas text-slate-400 text-xs"></i> ספורט</button>
@@ -131,7 +132,7 @@
                 </div>
             </div>
 
-            <div id="channels-main-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+            <div id="channels-main-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6"></div>
             
             <div id="channels-empty-state" class="hidden text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl max-w-md mx-auto mt-8">
                 <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-folder-open"></i></div>
@@ -142,9 +143,13 @@
 
 
         <div id="page-detail" class="page">
-            <div class="mb-8">
+            <div class="mb-8 flex items-center justify-between">
                 <button onclick="switchPage('home')" class="text-slate-500 hover:text-slate-900 text-sm font-bold flex items-center gap-2 group cursor-pointer">
                     <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i> חזרה לכל הערוצים
+                </button>
+                
+                <button id="detail-edit-btn" onclick="openChannelEditMode()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold items-center gap-2 transition-all cursor-pointer">
+                    <i class="fa-solid fa-pen-to-square text-slate-500"></i> עריכת פרטי הערוץ
                 </button>
             </div>
 
@@ -154,7 +159,7 @@
                         <div id="detail-category-badge" class="absolute top-6 left-6 text-xs font-bold px-3 py-1.5 rounded-xl"></div>
                         
                         <div class="flex items-start gap-5">
-                            <div id="detail-avatar" class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-md shrink-0"></div>
+                            <div id="detail-avatar-container" class="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-md shrink-0 overflow-hidden bg-slate-100"></div>
                             <div>
                                 <h1 id="detail-title" class="text-2xl lg:text-3xl font-black text-slate-900 mb-1.5"></h1>
                                 <div class="flex items-center gap-3">
@@ -216,6 +221,12 @@
                         </button>
                     </form>
 
+                    <div id="review-already-submitted" class="hidden text-center py-6 border border-dashed border-amber-200 rounded-2xl bg-amber-50/50 px-4">
+                        <i class="fa-solid fa-circle-check text-amber-500 text-2xl block mb-2"></i>
+                        <p class="text-slate-700 font-bold text-xs">כבר פרסמת ביקורת לערוץ זה</p>
+                        <p class="text-slate-400 text-[11px] mt-1">על פי חוקי הקהילה, ניתן להוסיף חוות דעת אחת בלבד לכל ערוץ וואטסאפ.</p>
+                    </div>
+
                     <div id="review-login-prompt" class="text-center py-6 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 px-4">
                         <i class="fa-solid fa-user-lock text-slate-300 text-2xl block mb-2"></i>
                         <p class="text-slate-600 font-bold text-xs mb-3">יש להתחבר כדי להוסיף ביקורת ערוץ</p>
@@ -236,8 +247,8 @@
             </div>
 
             <div class="text-center max-w-md mx-auto mb-10">
-                <h1 class="text-3xl font-black text-slate-900 mb-2">פרסום ערוץ וואטסאפ</h1>
-                <p class="text-slate-400 text-sm font-medium">מלאו את הפרטים מטה כדי להוסיף את הערוץ שלכם לספרייה הציבורית</p>
+                <h1 id="submit-page-title" class="text-3xl font-black text-slate-900 mb-2">פרסום ערוץ וואטסאפ</h1>
+                <p id="submit-page-desc" class="text-slate-400 text-sm font-medium">מלאו את הפרטים מטה כדי להוסיף את הערוץ שלכם לספרייה הציבורית</p>
             </div>
 
             <div class="max-w-2xl mx-auto bg-white border border-slate-100 rounded-2xl p-6 lg:p-8 shadow-xl shadow-slate-100/50">
@@ -251,6 +262,7 @@
                             <label class="block text-slate-700 font-bold text-sm mb-2">קטגוריה *</label>
                             <select id="form-category" required class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-600 appearance-none bg-no-repeat bg-[left_1rem_center]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22292.4%22 height=%22292.4%22><path fill=%22%236b7280%22 d=%22M287 69.4a17.6 17.6 0 0 0-13-5.4H18.4c-5 0-9.3 1.8-12.9 5.4A17.6 17.6 0 0 0 0 82.2c0 5 1.8 9.3 5.4 12.9l128 127.9c3.6 3.6 7.8 5.4 12.8 5.4s9.2-1.8 12.8-5.4L287 95c3.5-3.5 5.4-7.8 5.4-12.8 0-5-1.9-9.2-5.5-12.8z%22/></svg>'); background-size: .65em auto;">
                                 <option value="" disabled selected>בחרו קטגוריה</option>
+                                <option value="גיימינג">גיימינג ומשחקים</option>
                                 <option value="חדשות">חדשות</option>
                                 <option value="טכנולוגיה">טכנולוגיה</option>
                                 <option value="ספורט">ספורט</option>
@@ -267,11 +279,16 @@
                     </div>
 
                     <div>
+                        <label class="block text-slate-700 font-bold text-sm mb-2">קישור לתמונת לוגו / פרופיל (URL) <span class="text-xs font-normal text-slate-400">(אופציונלי)</span></label>
+                        <input type="url" id="form-image" placeholder="https://example.com/logo.png" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800 text-left" dir="ltr">
+                    </div>
+
+                    <div>
                         <label class="block text-slate-700 font-bold text-sm mb-2">תיאור ותוכן הערוץ *</label>
                         <textarea id="form-description" required rows="4" placeholder="תארו כאן בקצרה מה מפורסם בערוץ שלכם כדי למשוך עוקבים חדשים..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800"></textarea>
                     </div>
 
-                    <button type="submit" class="w-full bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 mt-4 cursor-pointer">
+                    <button type="submit" id="form-submit-btn" class="w-full bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 mt-4 cursor-pointer">
                         <i class="fa-solid fa-cloud-arrow-up"></i> פרסום הערוץ למערכת
                     </button>
                 </form>
@@ -310,23 +327,46 @@
                 </div>
             </div>
 
-            <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs">
-                <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
-                    <h3 class="font-black text-slate-900 text-lg">ניהול תוכן ובקרת ערוצי המערכת</h3>
+            <div class="grid grid-cols-1 gap-8">
+                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs">
+                    <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+                        <h3 class="font-black text-slate-900 text-lg">ניהול תוכן ובקרת ערוצי המערכת</h3>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse text-sm">
+                            <thead>
+                                <tr class="text-slate-400 font-bold border-b border-slate-100">
+                                    <th class="pb-3 pr-2">ערוץ</th>
+                                    <th class="pb-3">קטגוריה</th>
+                                    <th class="pb-3">디רוג ממוצע</th>
+                                    <th class="pb-3 text-center">פעולות ניהול</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-tbody" class="divide-y divide-slate-50 font-medium text-slate-700"></tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-right border-collapse text-sm">
-                        <thead>
-                            <tr class="text-slate-400 font-bold border-b border-slate-100">
-                                <th class="pb-3 pr-2">ערוץ</th>
-                                <th class="pb-3">קטגוריה</th>
-                                <th class="pb-3">דירוג ממוצע</th>
-                                <th class="pb-3 text-center">פעולות ניהול</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-table-tbody" class="divide-y divide-slate-50 font-medium text-slate-700"></tbody>
-                    </table>
+                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs">
+                    <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+                        <h3 class="font-black text-slate-900 text-lg">בקרת ביקורות וחוות דעת קהילה</h3>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse text-sm">
+                            <thead>
+                                <tr class="text-slate-400 font-bold border-b border-slate-100">
+                                    <th class="pb-3 pr-2">משתמש</th>
+                                    <th class="pb-3">ערוץ</th>
+                                    <th class="pb-3">דירוג</th>
+                                    <th class="pb-3">תוכן הביקורת</th>
+                                    <th class="pb-3 text-center">פעולות ניהול</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-reviews-tbody" class="divide-y divide-slate-50 font-medium text-slate-700"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -338,12 +378,10 @@
     </footer>
 
     <script type="module">
-        // Import Module Firebase Libraries
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, doc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, deleteDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Firebase Configuration
         const firebaseConfig = {
           apiKey: "AIzaSyA4yO8CW2qI0T4l5GHnb4_akld7D10B8J0",
           authDomain: "netvibe-6e6bf.firebaseapp.com",
@@ -354,26 +392,24 @@
           measurementId: "G-GLH71SSZ98"
         };
 
-        // Initialize Native Instances
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         const googleProvider = new GoogleAuthProvider();
 
-        // Admin Configuration Pointer Matrix
         const ADMIN_UID_TARGET = "qRnHAa4n28f5tl1ozTK5em06WGK2";
 
-        // Stateful Runtime Cache Pointers
         let channelsDataCache = [];
         let reviewsDataCache = [];
         let activeSelectedChannelId = null;
         let activeSelectedCategoryFilter = 'all';
         let currentUser = null;
+        let editingChannelId = null;
 
-        // Styling Themes Mapping
         const categoryThemes = {
+            'גיימינג': { bg: 'bg-indigo-50/70', text: 'text-indigo-600', badge: 'bg-indigo-100 text-indigo-700', icon: 'fa-gamepad' },
             'חדשות': { bg: 'bg-slate-50', text: 'text-slate-700', badge: 'bg-slate-100 text-slate-700', icon: 'fa-newspaper' },
-            'טכנולוגיה': { bg: 'bg-indigo-50', text: 'text-indigo-700', badge: 'bg-indigo-100 text-indigo-700', icon: 'fa-laptop' },
+            'טכנולוגיה': { bg: 'bg-teal-50', text: 'text-teal-700', badge: 'bg-teal-100 text-teal-700', icon: 'fa-laptop' },
             'ספורט': { bg: 'bg-blue-50', text: 'text-blue-700', badge: 'bg-blue-100 text-blue-700', icon: 'fa-earth-americas' },
             'בידור': { bg: 'bg-purple-50', text: 'text-purple-700', badge: 'bg-purple-100 text-purple-700', icon: 'fa-clapperboard' },
             'עסקים': { bg: 'bg-amber-50', text: 'text-amber-700', badge: 'bg-amber-100 text-amber-700', icon: 'fa-briefcase' },
@@ -381,7 +417,6 @@
         };
         const defaultTheme = { bg: 'bg-emerald-50', text: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', icon: 'fa-hashtag' };
 
-        // Realtime Data Sync Event Listeners Pipeline
         function initRealtimeSyncPipelines() {
             onSnapshot(collection(db, "channels"), (channelsSnapshot) => {
                 channelsDataCache = [];
@@ -401,13 +436,10 @@
             }, (err) => hideLoadingScreenOverlaySpinner());
         }
 
-        // Monitoring Authentication State Changes Engine Lifecycle
         function initAuthenticationStateMonitor() {
             onAuthStateChanged(auth, (user) => {
                 const navAdminBtn = document.getElementById('nav-admin-btn');
                 const profileContainer = document.getElementById('user-profile-badge');
-                const reviewForm = document.getElementById('add-review-form');
-                const reviewPrompt = document.getElementById('review-login-prompt');
                 const reviewNameInput = document.getElementById('review-user-name');
                 
                 currentUser = user;
@@ -418,9 +450,7 @@
                     profileContainer.classList.remove('hidden');
 
                     if(reviewNameInput) reviewNameInput.value = user.displayName || 'משתמש אנונימי';
-                    if(reviewForm) reviewForm.classList.remove('hidden');
-                    if(reviewPrompt) reviewPrompt.classList.add('hidden');
-
+                    
                     if (user.uid === ADMIN_UID_TARGET) {
                         navAdminBtn.innerHTML = `<i class="fa-solid fa-chart-pie text-base"></i> פאנל ניהול`;
                     } else {
@@ -429,19 +459,19 @@
                 } else {
                     profileContainer.classList.add('hidden');
                     navAdminBtn.innerHTML = `<i class="fa-solid fa-lock text-base"></i> פאנל ניהול`;
-                    
-                    if(reviewForm) reviewForm.classList.add('hidden');
-                    if(reviewPrompt) reviewPrompt.classList.remove('hidden');
 
                     const activePage = document.querySelector('.page.active');
                     if (activePage && activePage.id === 'page-admin') {
                         switchPage('home');
                     }
                 }
+                
+                if (activeSelectedChannelId) {
+                    renderSpecificChannelDetailPageContext(activeSelectedChannelId);
+                }
             });
         }
 
-        // Expose Functions to Global Context
         window.switchPage = function(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             const targetPage = document.getElementById(`page-${pageId}`);
@@ -453,6 +483,15 @@
             } else {
                 navHomeBtn.classList.remove('hidden');
             }
+
+            if (pageId !== 'submit') {
+                editingChannelId = null;
+                document.getElementById('create-channel-form').reset();
+                document.getElementById('submit-page-title').innerText = "פרסום ערוץ וואטסאפ";
+                document.getElementById('submit-page-desc').innerText = "מלאו את הפרטים מטה כדי להוסיף את הערוץ שלכם לספרייה הציבורית";
+                document.getElementById('form-submit-btn').innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> פרסום הערוץ למערכת`;
+            }
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -536,27 +575,68 @@
 
         window.handleChannelSubmit = async function(e) {
             e.preventDefault();
+            if (!currentUser) return;
+
+            const channelPayload = {
+                title: document.getElementById('form-title').value,
+                category: document.getElementById('form-category').value,
+                url: document.getElementById('form-url').value,
+                image: document.getElementById('form-image').value.trim(),
+                description: document.getElementById('form-description').value,
+                timestamp: Date.now()
+            };
+
             try {
                 showLoadingScreenOverlaySpinner();
-                await addDoc(collection(db, "channels"), {
-                    title: document.getElementById('form-title').value,
-                    category: document.getElementById('form-category').value,
-                    url: document.getElementById('form-url').value,
-                    description: document.getElementById('form-description').value,
-                    timestamp: Date.now()
-                });
-                document.getElementById('create-channel-form').reset();
-                switchPage('home');
+                if (editingChannelId) {
+                    await updateDoc(doc(db, "channels", editingChannelId), channelPayload);
+                    const updatedId = editingChannelId;
+                    editingChannelId = null;
+                    document.getElementById('create-channel-form').reset();
+                    window.navigateToChannelDetailsViewPage(updatedId);
+                } else {
+                    channelPayload.creatorUid = currentUser.uid;
+                    await addDoc(collection(db, "channels"), channelPayload);
+                    document.getElementById('create-channel-form').reset();
+                    switchPage('home');
+                }
             } catch(err) {
-                alert("שגיאה בהעלאת הערוץ: " + err.message);
+                alert("שגיאה בשמירת הנתונים: " + err.message);
             } finally {
                 hideLoadingScreenOverlaySpinner();
             }
         };
 
+        window.openChannelEditMode = function() {
+            if (!activeSelectedChannelId) return;
+            const ch = channelsDataCache.find(c => c.id === activeSelectedChannelId);
+            if (!ch) return;
+
+            editingChannelId = ch.id;
+
+            document.getElementById('form-title').value = ch.title || '';
+            document.getElementById('form-category').value = ch.category || '';
+            document.getElementById('form-url').value = ch.url || '';
+            document.getElementById('form-image').value = ch.image || '';
+            document.getElementById('form-description').value = ch.description || '';
+
+            document.getElementById('submit-page-title').innerText = "עריכת ערוץ וואטסאפ";
+            document.getElementById('submit-page-desc').innerText = "עדכן את פרטי הערוץ שלך ושמור את השינויים";
+            document.getElementById('form-submit-btn').innerHTML = `<i class="fa-solid fa-square-check"></i> שמירת שינויים ועדכון`;
+
+            switchPage('submit');
+        };
+
         window.handleReviewSubmit = async function(e) {
             e.preventDefault();
             if(!currentUser) return;
+
+            const alreadyReviewed = reviewsDataCache.some(r => r.channelId === activeSelectedChannelId && r.userName === currentUser.displayName);
+            if (alreadyReviewed) {
+                alert("כבר פרסמת ביקורת לערוץ זה בעבר.");
+                return;
+            }
+
             try {
                 showLoadingScreenOverlaySpinner();
                 const starsRadio = document.querySelector('input[name="rating-stars"]:checked');
@@ -576,12 +656,25 @@
         };
 
         window.handleDeleteChannelDocumentEvent = async function(id) {
-            if(confirm("האם אתה בטוח שברצונך למחוק את הערוץ הזה מהמערכת באופן סופי?")) {
+            if(confirm("האם אתה בטוח שברצונך למחוק את הערוץ הזה מהמערכת באופן סופי? כל הביקורות המשויכות לו יישארו בארכיון אך הערוץ יוסר.")) {
                 try {
                     showLoadingScreenOverlaySpinner();
                     await deleteDoc(doc(db, "channels", id));
                 } catch(err) {
                     alert("שגיאה במחיקת הערוץ");
+                } finally {
+                    hideLoadingScreenOverlaySpinner();
+                }
+            }
+        };
+
+        window.handleDeleteReviewDocumentEvent = async function(id) {
+            if(confirm("האם אתה בטוח שברצונך למחוק את הביקורת הזו לצמיתות?")) {
+                try {
+                    showLoadingScreenOverlaySpinner();
+                    await deleteDoc(doc(db, "reviews", id));
+                } catch(err) {
+                    alert("שגיאה במחיקת הביקורת");
                 } finally {
                     hideLoadingScreenOverlaySpinner();
                 }
@@ -603,6 +696,17 @@
                 const sum = matchedReviews.reduce((acc, curr) => acc + curr.rating, 0);
                 const avg = count > 0 ? parseFloat((sum / count).toFixed(1)) : 0.0;
                 return { ...channel, reviewCount: count, averageRating: avg };
+            });
+
+            channelsDataCache.sort((a, b) => {
+                if (b.reviewCount !== a.reviewCount) {
+                    return b.reviewCount - a.reviewCount;
+                }
+                return b.averageRating - a.averageRating;
+            });
+
+            channelsDataCache = channelsDataCache.map((channel, index) => {
+                return { ...channel, rankIndex: index + 1 };
             });
 
             window.renderMainChannelsGridDisplayItems();
@@ -639,29 +743,37 @@
 
             filtered.forEach(ch => {
                 const uiTheme = categoryThemes[ch.category] || defaultTheme;
-                const starsHtml = renderStarsHelperUIElement(ch.averageRating);
                 
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-100 hover:border-emerald-500 rounded-2xl p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex gap-4 items-start relative group cursor-pointer transform hover:-translate-y-0.5";
+                card.className = "bg-white border border-slate-100 hover:border-emerald-500 rounded-2xl p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex flex-col items-center text-center relative group cursor-pointer transform hover:-translate-y-0.5 aspect-square justify-between overflow-hidden";
                 card.onclick = () => window.navigateToChannelDetailsViewPage(ch.id);
                 
+                let avatarHTML = '';
+                if (ch.image && ch.image.startsWith('http')) {
+                    avatarHTML = `<img src="${ch.image}" class="w-full h-full object-cover">`;
+                } else {
+                    avatarHTML = `<i class="fa-solid ${uiTheme.icon}"></i>`;
+                }
+
                 card.innerHTML = `
-                    <div class="${uiTheme.bg} ${uiTheme.text} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-                        <i class="fa-solid ${uiTheme.icon}"></i>
+                    <div class="absolute top-3 right-3 flex items-center gap-1">
+                        <span class="bg-slate-900/5 text-slate-700 font-extrabold text-[10px] px-2 py-0.5 rounded-md">#${ch.rankIndex}</span>
+                        <span class="${uiTheme.badge} text-[9px] font-bold px-2 py-0.5 rounded-md shrink-0">${ch.category}</span>
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center justify-between gap-2 mb-1">
-                            <h3 class="font-extrabold text-slate-900 text-base group-hover:text-emerald-600 transition-colors truncate">${ch.title}</h3>
-                            <span class="${uiTheme.badge} text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0">${ch.category}</span>
-                        </div>
-                        <p class="text-slate-400 text-xs font-medium leading-relaxed line-clamp-2 mb-4 pl-2">${ch.description}</p>
-                        <div class="flex items-center justify-between text-xs font-bold text-slate-400 pt-1 border-t border-slate-50">
-                            <div class="flex items-center gap-3">
-                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-comments text-slate-300 text-[11px]"></i> ${ch.reviewCount} ביקורות</span>
-                            </div>
-                            <div class="flex items-center gap-1 text-amber-400 font-bold bg-amber-50/50 px-2 py-0.5 rounded-md">
-                                ${ch.averageRating > 0 ? `${ch.averageRating} ${starsHtml}` : `<span class="text-slate-400 text-[10px]">אין דירוג</span>`}
-                            </div>
+                    
+                    <div class="mt-7 ${uiTheme.bg} ${uiTheme.text} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
+                        ${avatarHTML}
+                    </div>
+                    
+                    <div class="flex-1 flex flex-col justify-center my-2 w-full min-w-0">
+                        <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-emerald-600 transition-colors truncate px-1">${ch.title}</h3>
+                        <p class="text-slate-400 text-[11px] font-medium leading-relaxed line-clamp-2 mt-1 px-1">${ch.description}</p>
+                    </div>
+                    
+                    <div class="w-full flex items-center justify-between text-[11px] font-bold text-slate-400 pt-2 border-t border-slate-50">
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-comments text-slate-300 text-[10px]"></i> ${ch.reviewCount}</span>
+                        <div class="flex items-center gap-1 text-amber-400 font-bold bg-amber-50/50 px-2 py-0.5 rounded-md">
+                            ${ch.averageRating > 0 ? `${ch.averageRating} <i class="fa-solid fa-star text-[9px]"></i>` : `<span class="text-slate-400 text-[9px]">אין דירוג</span>`}
                         </div>
                     </div>
                 `;
@@ -671,8 +783,11 @@
 
         function renderAdminDashboardLayoutViewControlPanel() {
             const tbody = document.getElementById('admin-table-tbody');
-            if(!tbody) return;
+            const reviewsTbody = document.getElementById('admin-reviews-tbody');
+            if(!tbody || !reviewsTbody) return;
+            
             tbody.innerHTML = '';
+            reviewsTbody.innerHTML = '';
 
             document.getElementById('admin-kpi-channels').innerText = channelsDataCache.length;
             document.getElementById('admin-kpi-reviews').innerText = reviewsDataCache.length;
@@ -686,7 +801,7 @@
                 tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors";
                 tr.innerHTML = `
                     <td class="py-4 pr-2">
-                        <div class="font-bold text-slate-800">${ch.title}</div>
+                        <div class="font-bold text-slate-800"><span class="text-slate-400 font-extrabold ml-1">#${ch.rankIndex}</span> ${ch.title}</div>
                         <div class="text-slate-400 text-xs max-w-xs truncate">${ch.url}</div>
                     </td>
                     <td class="py-4 text-slate-500 font-semibold text-xs">${ch.category}</td>
@@ -706,6 +821,28 @@
                 `;
                 tbody.appendChild(tr);
             });
+
+            if(reviewsDataCache.length === 0) {
+                reviewsTbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400 font-medium text-xs">אין ביקורות רשומות במערכת.</td></tr>`;
+            } else {
+                reviewsDataCache.forEach(rev => {
+                    const matchedChannel = channelsDataCache.find(c => c.id === rev.channelId);
+                    const channelName = matchedChannel ? matchedChannel.title : "ערוץ שהוסר (#" + rev.channelId.substring(0,5) + ")";
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors text-xs";
+                    tr.innerHTML = `
+                        <td class="py-4 pr-2 font-bold text-slate-800">${rev.userName || 'משתמש'}</td>
+                        <td class="py-4 text-slate-600 font-semibold">${channelName}</td>
+                        <td class="py-4 text-amber-500 font-bold"><i class="fa-solid fa-star text-[10px]"></i> ${rev.rating}</td>
+                        <td class="py-4 text-slate-500 max-w-xs truncate" title="${rev.content || ''}">${rev.content || '-'}</td>
+                        <td class="py-4 text-center">
+                            <button onclick="window.handleDeleteReviewDocumentEvent('${rev.id}')" class="text-red-400 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-lg transition-all cursor-pointer" title="מחק ביקורת זו"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                        </td>
+                    `;
+                    reviewsTbody.appendChild(tr);
+                });
+            }
         }
 
         window.navigateToChannelDetailsViewPage = function(id) {
@@ -714,13 +851,38 @@
             switchPage('detail');
         };
 
+        function toggleReviewFormVisibilityBasedOnUserAuthState() {
+            const reviewForm = document.getElementById('add-review-form');
+            const reviewPrompt = document.getElementById('review-login-prompt');
+            const reviewAlreadySubmitted = document.getElementById('review-already-submitted');
+
+            if (!currentUser) {
+                reviewForm.classList.add('hidden');
+                reviewAlreadySubmitted.classList.add('hidden');
+                reviewPrompt.classList.remove('hidden');
+                return;
+            }
+
+            const hasUserAlreadySubmittedReview = reviewsDataCache.some(r => r.channelId === activeSelectedChannelId && r.userName === currentUser.displayName);
+
+            if (hasUserAlreadySubmittedReview) {
+                reviewForm.classList.add('hidden');
+                reviewPrompt.classList.add('hidden');
+                reviewAlreadySubmitted.classList.remove('hidden');
+            } else {
+                reviewPrompt.classList.add('hidden');
+                reviewAlreadySubmitted.classList.add('hidden');
+                reviewForm.classList.remove('hidden');
+            }
+        }
+
         function renderSpecificChannelDetailPageContext(id) {
             const ch = channelsDataCache.find(c => c.id === id);
             if(!ch) return;
 
             const uiTheme = categoryThemes[ch.category] || defaultTheme;
             
-            document.getElementById('detail-title').innerText = ch.title;
+            document.getElementById('detail-title').innerHTML = `<span class="text-emerald-600 font-extrabold ml-2 text-xl lg:text-2xl">מקום #${ch.rankIndex}</span><br>${ch.title}`;
             document.getElementById('detail-description').innerText = ch.description;
             document.getElementById('detail-join-href').href = ch.url;
             
@@ -728,13 +890,27 @@
             badge.innerText = ch.category;
             badge.className = `absolute top-6 left-6 text-xs font-bold px-3 py-1.5 rounded-xl ${uiTheme.badge}`;
             
-            const avatar = document.getElementById('detail-avatar');
-            avatar.className = `w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-md shrink-0 ${uiTheme.bg} ${uiTheme.text}`;
-            avatar.innerHTML = `<i class="fa-solid ${uiTheme.icon}"></i>`;
+            const avatarContainer = document.getElementById('detail-avatar-container');
+            if (ch.image && ch.image.startsWith('http')) {
+                avatarContainer.className = "w-16 h-16 rounded-2xl flex items-center justify-center shadow-md shrink-0 overflow-hidden";
+                avatarContainer.innerHTML = `<img src="${ch.image}" class="w-full h-full object-cover">`;
+            } else {
+                avatarContainer.className = `w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-md shrink-0 ${uiTheme.bg} ${uiTheme.text}`;
+                avatarContainer.innerHTML = `<i class="fa-solid ${uiTheme.icon}"></i>`;
+            }
 
             document.getElementById('detail-stars').innerHTML = renderStarsHelperUIElement(ch.averageRating);
             document.getElementById('detail-rating-text').innerText = ch.averageRating > 0 ? `${ch.averageRating} מתוך 5 (${ch.reviewCount} ביקורות)` : "טרם דורג";
             
+            const editBtn = document.getElementById('detail-edit-btn');
+            if (currentUser && (currentUser.uid === ch.creatorUid || currentUser.uid === ADMIN_UID_TARGET)) {
+                editBtn.classList.remove('hidden');
+                editBtn.classList.add('inline-flex');
+            } else {
+                editBtn.classList.add('hidden');
+                editBtn.classList.remove('inline-flex');
+            }
+
             const matchedReviews = reviewsDataCache.filter(r => r.channelId === id);
             const container = document.getElementById('detail-reviews-list-container');
             document.getElementById('detail-reviews-count').innerText = matchedReviews.length;
@@ -747,6 +923,7 @@
                         אין עדיין ביקורות לערוץ זה. היו הראשונים לכתוב!
                     </div>
                 `;
+                toggleReviewFormVisibilityBasedOnUserAuthState();
                 return;
             }
 
@@ -767,6 +944,8 @@
                 `;
                 container.appendChild(item);
             });
+
+            toggleReviewFormVisibilityBasedOnUserAuthState();
         }
 
         function renderStarsHelperUIElement(rating) {
@@ -784,7 +963,6 @@
             return html;
         }
 
-        // Initialize App Operations
         showLoadingScreenOverlaySpinner();
         initAuthenticationStateMonitor();
         initRealtimeSyncPipelines();
