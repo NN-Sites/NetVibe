@@ -339,33 +339,11 @@
                                 <tr class="text-slate-400 font-bold border-b border-slate-100">
                                     <th class="pb-3 pr-2">ערוץ</th>
                                     <th class="pb-3">קטגוריה</th>
-                                    <th class="pb-3">디רוג ממוצע</th>
+                                    <th class="pb-3">דירוג ממוצע</th>
                                     <th class="pb-3 text-center">פעולות ניהול</th>
                                 </tr>
-                            </thead>
-                            <tbody id="admin-table-tbody" class="divide-y divide-slate-50 font-medium text-slate-700"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs">
-                    <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
-                        <h3 class="font-black text-slate-900 text-lg">בקרת ביקורות וחוות דעת קהילה</h3>
-                    </div>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-right border-collapse text-sm">
-                            <thead>
-                                <tr class="text-slate-400 font-bold border-b border-slate-100">
-                                    <th class="pb-3 pr-2">משתמש</th>
-                                    <th class="pb-3">ערוץ</th>
-                                    <th class="pb-3">דירוג</th>
-                                    <th class="pb-3">תוכן הביקורת</th>
-                                    <th class="pb-3 text-center">פעולות ניהול</th>
-                                </tr>
-                            </thead>
-                            <tbody id="admin-reviews-tbody" class="divide-y divide-slate-50 font-medium text-slate-700"></tbody>
-                        </table>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -643,6 +621,7 @@
                 await addDoc(collection(db, "reviews"), {
                     channelId: activeSelectedChannelId,
                     userName: currentUser.displayName || 'משתמש',
+                    userUid: currentUser.uid,
                     rating: parseInt(starsRadio ? starsRadio.value : '5'),
                     content: document.getElementById('review-content').value,
                     timestamp: Date.now()
@@ -863,7 +842,7 @@
                 return;
             }
 
-            const hasUserAlreadySubmittedReview = reviewsDataCache.some(r => r.channelId === activeSelectedChannelId && r.userName === currentUser.displayName);
+            const hasUserAlreadySubmittedReview = reviewsDataCache.some(r => r.channelId === activeSelectedChannelId && (r.userUid === currentUser.uid || r.userName === currentUser.displayName));
 
             if (hasUserAlreadySubmittedReview) {
                 reviewForm.classList.add('hidden');
@@ -929,13 +908,22 @@
 
             matchedReviews.forEach(rev => {
                 const dateText = rev.timestamp ? new Date(rev.timestamp).toLocaleDateString('he-IL', {day: 'numeric', month: 'short', year: 'numeric'}) : '';
+                
+                let adminBadgeHTML = '';
+                if (rev.userUid === ADMIN_UID_TARGET) {
+                    adminBadgeHTML = `<span class="bg-red-50 text-red-600 border border-red-100 text-[10px] font-black px-1.5 py-0.5 rounded-md mr-1.5 animate-pulse">מנהל האתר</span>`;
+                }
+
                 const item = document.createElement('div');
                 item.className = "bg-slate-50/70 border border-slate-100 rounded-xl p-4 space-y-2";
                 item.innerHTML = `
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2">
                             <div class="w-7 h-7 bg-slate-200 text-slate-600 font-bold rounded-full flex items-center justify-center text-[11px]">${rev.userName ? rev.userName.charAt(0) : 'U'}</div>
-                            <span class="font-bold text-slate-800 text-sm">${rev.userName || 'משתמש'}</span>
+                            <div class="flex items-center">
+                                <span class="font-bold text-slate-800 text-sm">${rev.userName || 'משתמש'}</span>
+                                ${adminBadgeHTML}
+                            </div>
                         </div>
                         <span class="text-slate-400 text-[10px] font-semibold">${dateText}</span>
                     </div>
