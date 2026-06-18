@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -66,7 +65,7 @@
                 <div id="user-profile-badge" class="hidden flex items-center gap-2 bg-slate-100 pl-3 pr-1.5 py-1 rounded-xl text-xs font-bold text-slate-700">
                     <img id="user-avatar-img" src="" class="w-6 h-6 rounded-full border border-slate-200">
                     <span id="user-display-name">משתמש</span>
-                    <button onclick="window.handleFirebaseLogout()" class="text-slate-400 hover:text-red-500 mr-1 transition-colors cursor-pointer" title="התנתק"><i class="fa-solid fa-right-from-bracket"></i></button>
+                    <button onclick="handleFirebaseLogout()" class="text-slate-400 hover:text-red-500 mr-1 transition-colors cursor-pointer" title="התנתק"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
                 <button onclick="handleCreateChannelRequest()" class="bg-gradient-to-br from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5">
                     <i class="fa-solid fa-plus text-xs"></i> פרסום ערוץ
@@ -220,7 +219,7 @@
                     <div id="review-login-prompt" class="text-center py-6 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50 px-4">
                         <i class="fa-solid fa-user-lock text-slate-300 text-2xl block mb-2"></i>
                         <p class="text-slate-600 font-bold text-xs mb-3">יש להתחבר כדי להוסיף ביקורת ערוץ</p>
-                        <button onclick="window.triggerGoogleLogin()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 mx-auto shadow-2xs cursor-pointer transition-all">
+                        <button onclick="triggerGoogleLogin()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 mx-auto shadow-2xs cursor-pointer transition-all">
                             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4"> התחברות מהירה עם Google
                         </button>
                     </div>
@@ -414,12 +413,10 @@
                 currentUser = user;
 
                 if (user) {
-                    // User is signed in (General User or Admin)
                     document.getElementById('user-avatar-img').src = user.photoURL || '';
                     document.getElementById('user-display-name').innerText = user.uid === ADMIN_UID_TARGET ? 'מנהל' : (user.displayName || 'משתמש');
                     profileContainer.classList.remove('hidden');
 
-                    // Adjust state for review form
                     if(reviewNameInput) reviewNameInput.value = user.displayName || 'משתמש אנונימי';
                     if(reviewForm) reviewForm.classList.remove('hidden');
                     if(reviewPrompt) reviewPrompt.classList.add('hidden');
@@ -430,15 +427,12 @@
                         navAdminBtn.innerHTML = `<i class="fa-solid fa-lock text-base"></i> פאנל ניהול`;
                     }
                 } else {
-                    // Not logged in at all
                     profileContainer.classList.add('hidden');
                     navAdminBtn.innerHTML = `<i class="fa-solid fa-lock text-base"></i> פאנל ניהול`;
                     
-                    // Toggle review view back to prompt
                     if(reviewForm) reviewForm.classList.add('hidden');
                     if(reviewPrompt) reviewPrompt.classList.remove('hidden');
 
-                    // Force kick-out if user is currently inside the admin panel page layout
                     const activePage = document.querySelector('.page.active');
                     if (activePage && activePage.id === 'page-admin') {
                         switchPage('home');
@@ -447,7 +441,37 @@
             });
         }
 
-        // Direct Login Trigger for reviews or actions
+        // Expose Functions to Global Context
+        window.switchPage = function(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) targetPage.classList.add('active');
+
+            const navHomeBtn = document.getElementById('nav-home-btn');
+            if (pageId === 'home') {
+                navHomeBtn.classList.add('hidden');
+            } else {
+                navHomeBtn.classList.remove('hidden');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.filterChannels = function() {
+            window.renderMainChannelsGridDisplayItems();
+        };
+
+        window.selectCategory = function(cat) {
+            activeSelectedCategoryFilter = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                if(btn.getAttribute('data-cat') === cat) {
+                    btn.className = "cat-btn bg-emerald-600 text-white shadow-md shadow-emerald-600/20 px-5 py-2 rounded-xl text-sm font-bold shrink-0 cursor-pointer transition-all";
+                } else {
+                    btn.className = "cat-btn bg-white border border-slate-200 text-slate-600 hover:border-slate-300 px-5 py-2 rounded-xl text-sm font-semibold shrink-0 cursor-pointer transition-all flex items-center gap-2";
+                }
+            });
+            window.renderMainChannelsGridDisplayItems();
+        };
+
         window.triggerGoogleLogin = async function() {
             try {
                 showLoadingScreenOverlaySpinner();
@@ -459,7 +483,6 @@
             }
         };
 
-        // Interactive Trigger Logic Entry Point Click Request Pipeline Button Auth Hook
         window.handleAdminAccessRequest = async function() {
             if (currentUser && currentUser.uid === ADMIN_UID_TARGET) {
                 switchPage('admin');
@@ -475,7 +498,6 @@
                         switchPage('admin');
                     } else {
                         alert("גישה נדחתה. חשבון הגוגל הזה אינו מוגדר כמנהל המערכת.");
-                        // Keep user logged in but don't grant admin page entry
                     }
                 } catch(err) {
                     alert("שגיאה בתהליך ההתחברות: " + err.message);
@@ -512,6 +534,60 @@
             }
         };
 
+        window.handleChannelSubmit = async function(e) {
+            e.preventDefault();
+            try {
+                showLoadingScreenOverlaySpinner();
+                await addDoc(collection(db, "channels"), {
+                    title: document.getElementById('form-title').value,
+                    category: document.getElementById('form-category').value,
+                    url: document.getElementById('form-url').value,
+                    description: document.getElementById('form-description').value,
+                    timestamp: Date.now()
+                });
+                document.getElementById('create-channel-form').reset();
+                switchPage('home');
+            } catch(err) {
+                alert("שגיאה בהעלאת הערוץ: " + err.message);
+            } finally {
+                hideLoadingScreenOverlaySpinner();
+            }
+        };
+
+        window.handleReviewSubmit = async function(e) {
+            e.preventDefault();
+            if(!currentUser) return;
+            try {
+                showLoadingScreenOverlaySpinner();
+                const starsRadio = document.querySelector('input[name="rating-stars"]:checked');
+                await addDoc(collection(db, "reviews"), {
+                    channelId: activeSelectedChannelId,
+                    userName: currentUser.displayName || 'משתמש',
+                    rating: parseInt(starsRadio ? starsRadio.value : '5'),
+                    content: document.getElementById('review-content').value,
+                    timestamp: Date.now()
+                });
+                document.getElementById('review-content').value = '';
+            } catch(err) {
+                alert("שגיאה בפרסום הביקורת: " + err.message);
+            } finally {
+                hideLoadingScreenOverlaySpinner();
+            }
+        };
+
+        window.handleDeleteChannelDocumentEvent = async function(id) {
+            if(confirm("האם אתה בטוח שברצונך למחוק את הערוץ הזה מהמערכת באופן סופי?")) {
+                try {
+                    showLoadingScreenOverlaySpinner();
+                    await deleteDoc(doc(db, "channels", id));
+                } catch(err) {
+                    alert("שגיאה במחיקת הערוץ");
+                } finally {
+                    hideLoadingScreenOverlaySpinner();
+                }
+            }
+        };
+
         function hideLoadingScreenOverlaySpinner() {
             document.getElementById('loading-overlay').classList.add('opacity-0', 'pointer-events-none');
         }
@@ -529,7 +605,7 @@
                 return { ...channel, reviewCount: count, averageRating: avg };
             });
 
-            renderMainChannelsGridDisplayItems();
+            window.renderMainChannelsGridDisplayItems();
             renderAdminDashboardLayoutViewControlPanel();
             
             if (activeSelectedChannelId) {
@@ -707,4 +783,11 @@
             }
             return html;
         }
+
+        // Initialize App Operations
+        showLoadingScreenOverlaySpinner();
+        initAuthenticationStateMonitor();
+        initRealtimeSyncPipelines();
     </script>
+</body>
+</html>
