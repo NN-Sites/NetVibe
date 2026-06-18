@@ -597,6 +597,7 @@
                     window.navigateToChannelDetailsViewPage(updatedId);
                 } else {
                     channelPayload.creatorUid = currentUser.uid;
+                    channelPayload.isSponsored = false; // ברירת מחדל לא ממומן
                     await addDoc(collection(db, "channels"), channelPayload);
                     document.getElementById('create-channel-form').reset();
                     switchPage('home');
@@ -683,6 +684,20 @@
             }
         };
 
+        // פונקציה חדשה להפעלה/כיבוי של קידום ממומן על ידי האדמין
+        window.toggleChannelSponsoredStatus = async function(id, currentStatus) {
+            try {
+                showLoadingScreenOverlaySpinner();
+                await updateDoc(doc(db, "channels", id), {
+                    isSponsored: !currentStatus
+                });
+            } catch (err) {
+                alert("שגיאה בעדכון סטטוס ממומן: " + err.message);
+            } finally {
+                hideLoadingScreenOverlaySpinner();
+            }
+        };
+
         function hideLoadingScreenOverlaySpinner() {
             document.getElementById('loading-overlay').classList.add('opacity-0', 'pointer-events-none');
         }
@@ -697,10 +712,19 @@
                 const count = matchedReviews.length;
                 const sum = matchedReviews.reduce((acc, curr) => acc + curr.rating, 0);
                 const avg = count > 0 ? parseFloat((sum / count).toFixed(1)) : 0.0;
-                return { ...channel, reviewCount: count, averageRating: avg };
+                return { 
+                    ...channel, 
+                    reviewCount: count, 
+                    averageRating: avg,
+                    isSponsored: channel.isSponsored || false 
+                };
             });
 
+            // מיון: קודם כל ערוצים ממומנים (isSponsored === true), ולאחר מכן לפי כמות ביקורות ודירוג
             channelsDataCache.sort((a, b) => {
+                if (b.isSponsored !== a.isSponsored) {
+                    return b.isSponsored ? 1 : -1;
+                }
                 if (b.reviewCount !== a.reviewCount) {
                     return b.reviewCount - a.reviewCount;
                 }
@@ -747,7 +771,11 @@
                 const uiTheme = categoryThemes[ch.category] || defaultTheme;
                 
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-100 hover:border-emerald-500 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex flex-row sm:flex-col items-center sm:text-center relative group cursor-pointer transform hover:-translate-y-0.5 gap-4 sm:gap-0 sm:aspect-square justify-between overflow-hidden w-full";
+                
+                // שינוי עיצוב קל למסגרת ממומנת
+                const sponsoredBorderClass = ch.isSponsored ? 'border-amber-400 ring-2 ring-amber-400/10 bg-amber-50/10' : 'border-slate-100 hover:border-emerald-500';
+                
+                card.className = `bg-white border ${sponsoredBorderClass} rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex flex-row sm:flex-col items-center sm:text-center relative group cursor-pointer transform hover:-translate-y-0.5 gap-4 sm:gap-0 sm:aspect-square justify-between overflow-hidden w-full`;
                 card.onclick = () => window.navigateToChannelDetailsViewPage(ch.id);
                 
                 let avatarHTML = '';
@@ -757,10 +785,14 @@
                     avatarHTML = `<i class="fa-solid ${uiTheme.icon}"></i>`;
                 }
 
+                // תג "ממומן" במידה והערוץ מקודם
+                const sponsoredBadgeHTML = ch.isSponsored ? `<span class="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black text-[9px] px-1.5 py-0.5 rounded-md shrink-0 shadow-2xs">🌟 ממומן</span>` : '';
+
                 card.innerHTML = `
                     <div class="absolute top-2 sm:top-3 left-2 right-auto sm:left-auto sm:right-3 flex items-center gap-1 z-10">
                         <span class="bg-slate-900/5 text-slate-700 font-extrabold text-[10px] px-1.5 sm:px-2 py-0.5 rounded-md">#${ch.rankIndex}</span>
                         <span class="${uiTheme.badge} text-[9px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md shrink-0">${ch.category}</span>
+                        ${sponsoredBadgeHTML}
                     </div>
                     
                     <div class="sm:mt-7 ${uiTheme.bg} ${uiTheme.text} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
@@ -801,9 +833,18 @@
             channelsDataCache.forEach(ch => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors";
+                
+                // הגדרת עיצוב כפתור ממומן באדמין
+                const sponsorBtnClass = ch.isSponsored ? 'bg-amber-500 text-white border-amber-600' : 'text-slate-400 hover:text-amber-500 hover:bg-amber-50 border-transparent';
+                const sponsorBtnTitle = ch.isSponsored ? 'הסר מקידום ממומן' : 'הפוך לערוץ ממומן';
+
                 tr.innerHTML = `
                     <td class="py-4 pr-2">
-                        <div class="font-bold text-slate-800"><span class="text-slate-400 font-extrabold ml-1">#${ch.rankIndex}</span> ${ch.title}</div>
+                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <span class="text-slate-400 font-extrabold">#${ch.rankIndex}</span> 
+                            <span>${ch.title}</span>
+                            ${ch.isSponsored ? `<span class="bg-amber-100 text-amber-800 font-bold text-[9px] px-1.5 py-0.5 rounded">ממומן</span>` : ''}
+                        </div>
                         <div class="text-slate-400 text-xs max-w-xs truncate">${ch.url}</div>
                     </td>
                     <td class="py-4 text-slate-500 font-semibold text-xs">${ch.category}</td>
@@ -815,7 +856,10 @@
                         </div>
                     </td>
                     <td class="py-4 text-center">
-                        <div class="flex items-center justify-center gap-3">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="window.toggleChannelSponsoredStatus('${ch.id}', ${ch.isSponsored})" class="p-1.5 rounded-lg border transition-all shadow-2xs cursor-pointer ${sponsorBtnClass}" title="${sponsorBtnTitle}">
+                                <i class="fa-solid fa-star text-xs"></i>
+                            </button>
                             <a href="${ch.url}" target="_blank" class="text-slate-400 hover:text-slate-600 p-1.5 hover:bg-white rounded-lg border border-transparent hover:border-slate-100 transition-all shadow-2xs" title="פתח קישור"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
                             <button onclick="window.handleDeleteChannelDocumentEvent('${ch.id}')" class="text-red-400 hover:text-red-600 p-1.5 hover:bg-red-50 rounded-lg border border-transparent hover:border-red-100 transition-all shadow-2xs cursor-pointer" title="מחק ערוץ"><i class="fa-solid fa-trash-can text-xs"></i></button>
                         </div>
@@ -932,7 +976,7 @@
                 container.innerHTML = `
                     <div class="text-center py-10 text-slate-400 font-medium text-xs">
                         <i class="fa-solid fa-comments text-lg block mb-2 text-slate-200"></i>
-                        אין עדיין ביקורות לערוץ זה. היו הראשונים לכתוב!
+                        אין עדיין ביקורות לערוץ הזה. היו הראשונים לכתוב!
                     </div>
                 `;
                 toggleReviewFormVisibilityBasedOnUserAuthState();
