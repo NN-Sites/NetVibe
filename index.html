@@ -288,7 +288,7 @@
                         <textarea id="form-description" required rows="4" placeholder="תארו כאן בקצרה מה מפורסם בערוץ שלכם כדי למשוך עוקבים חדשים..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800"></textarea>
                     </div>
 
-                    <button type="submit" id="form-submit-btn" class="w-full bg-gradient-to-br from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 mt-4 cursor-pointer">
+                    <button type="submit" id="form-submit-btn" class="w-full bg-gradient-to-br from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 mt-4 cursor-pointer">
                         <i class="fa-solid fa-cloud-arrow-up"></i> פרסום הערוץ למערכת
                     </button>
                 </form>
@@ -342,8 +342,30 @@
                                     <th class="pb-3">דירוג ממוצע</th>
                                     <th class="pb-3 text-center">פעולות ניהול</th>
                                 </tr>
-                            </table>
-                        </div>
+                            </thead>
+                            <tbody id="admin-table-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-xs">
+                    <div class="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
+                        <h3 class="font-black text-slate-900 text-lg">בקרת ביקורות וחוות דעת</h3>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-right border-collapse text-sm">
+                            <thead>
+                                <tr class="text-slate-400 font-bold border-b border-slate-100">
+                                    <th class="pb-3 pr-2">כותב הביקורת</th>
+                                    <th class="pb-3">משויך לערוץ</th>
+                                    <th class="pb-3">דירוג</th>
+                                    <th class="pb-3">תוכן חוות הדעת</th>
+                                    <th class="pb-3 text-center">פעולות</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-reviews-tbody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -808,10 +830,20 @@
                     const matchedChannel = channelsDataCache.find(c => c.id === rev.channelId);
                     const channelName = matchedChannel ? matchedChannel.title : "ערוץ שהוסר (#" + rev.channelId.substring(0,5) + ")";
                     
+                    let adminBadgeHTML = '';
+                    if (rev.userUid === ADMIN_UID_TARGET) {
+                        adminBadgeHTML = `<span class="bg-red-50 text-red-600 border border-red-100 text-[10px] font-black px-1.5 py-0.5 rounded-md mr-1.5">מנהל האתר</span>`;
+                    }
+                    
                     const tr = document.createElement('tr');
                     tr.className = "border-b border-slate-50 hover:bg-slate-50/50 transition-colors text-xs";
                     tr.innerHTML = `
-                        <td class="py-4 pr-2 font-bold text-slate-800">${rev.userName || 'משתמש'}</td>
+                        <td class="py-4 pr-2 font-bold text-slate-800">
+                            <div class="flex items-center">
+                                <span>${rev.userName || 'משתמש'}</span>
+                                ${adminBadgeHTML}
+                            </div>
+                        </td>
                         <td class="py-4 text-slate-600 font-semibold">${channelName}</td>
                         <td class="py-4 text-amber-500 font-bold"><i class="fa-solid fa-star text-[10px]"></i> ${rev.rating}</td>
                         <td class="py-4 text-slate-500 max-w-xs truncate" title="${rev.content || ''}">${rev.content || '-'}</td>
