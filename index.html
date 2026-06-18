@@ -67,9 +67,6 @@
                     <span id="user-display-name">משתמש</span>
                     <button onclick="handleFirebaseLogout()" class="text-slate-400 hover:text-red-500 mr-1 transition-colors cursor-pointer" title="התנתק"><i class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
-                <button onclick="handleCreateChannelRequest()" class="bg-gradient-to-br from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5">
-                    <i class="fa-solid fa-plus text-xs"></i> פרסום ערוץ
-                </button>
             </div>
             
             <div onclick="switchPage('home')" class="flex items-center gap-2.5 cursor-pointer group">
@@ -89,7 +86,7 @@
     <main class="max-w-7xl mx-auto px-4 lg:px-8 py-12 flex-grow w-full">
 
         <div id="page-home" class="page active">
-            <div class="text-center max-w-3xl mx-auto mb-12">
+            <div class="text-center max-w-3xl mx-auto mb-12 flex flex-col items-center">
                 <div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-xs font-bold mb-6 shadow-xs">
                     <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
                     <i class="fa-solid fa-bolt text-[11px]"></i> מרכז ערוצי הוואטסאפ הגדול והאיכותי ביותר
@@ -97,9 +94,13 @@
                 <h1 class="text-4xl lg:text-6xl font-black text-slate-900 leading-tight tracking-tight mb-4">
                     מצא את ערוץ הוואטסאפ <br><span class="gradient-text">הבא שלך</span>
                 </h1>
-                <p class="text-slate-500 text-base lg:text-lg font-medium max-w-2xl mx-auto leading-relaxed">
+                <p class="text-slate-500 text-base lg:text-lg font-medium max-w-2xl mx-auto leading-relaxed mb-6">
                     גלשו בספרייה הקהילתית הגדולה, קראו ביקורות אותנטיות של משתמשים והצטרפו ישירות בלחיצת כפתור אחת.
                 </p>
+                
+                <button onclick="handleCreateChannelRequest()" class="bg-gradient-to-br from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/20 text-white px-7 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all cursor-pointer transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-plus text-xs"></i> פרסום ערוץ משלכם בספרייה
+                </button>
             </div>
 
             <div class="max-w-2xl mx-auto mb-12">
@@ -132,7 +133,7 @@
                 </div>
             </div>
 
-            <div id="channels-main-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6"></div>
+            <div id="channels-main-grid" class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-6"></div>
             
             <div id="channels-empty-state" class="hidden text-center py-16 bg-white border border-dashed border-slate-200 rounded-2xl max-w-md mx-auto mt-8">
                 <div class="w-16 h-16 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center text-2xl mx-auto mb-4"><i class="fa-solid fa-folder-open"></i></div>
@@ -746,7 +747,7 @@
                 const uiTheme = categoryThemes[ch.category] || defaultTheme;
                 
                 const card = document.createElement('div');
-                card.className = "bg-white border border-slate-100 hover:border-emerald-500 rounded-2xl p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex flex-col items-center text-center relative group cursor-pointer transform hover:-translate-y-0.5 aspect-square justify-between overflow-hidden";
+                card.className = "bg-white border border-slate-100 hover:border-emerald-500 rounded-2xl p-4 sm:p-5 shadow-xs hover:shadow-xl hover:shadow-slate-100/80 transition-all flex flex-row sm:flex-col items-center sm:text-center relative group cursor-pointer transform hover:-translate-y-0.5 gap-4 sm:gap-0 sm:aspect-square justify-between overflow-hidden w-full";
                 card.onclick = () => window.navigateToChannelDetailsViewPage(ch.id);
                 
                 let avatarHTML = '';
@@ -757,23 +758,23 @@
                 }
 
                 card.innerHTML = `
-                    <div class="absolute top-3 right-3 flex items-center gap-1">
-                        <span class="bg-slate-900/5 text-slate-700 font-extrabold text-[10px] px-2 py-0.5 rounded-md">#${ch.rankIndex}</span>
-                        <span class="${uiTheme.badge} text-[9px] font-bold px-2 py-0.5 rounded-md shrink-0">${ch.category}</span>
+                    <div class="absolute top-2 sm:top-3 left-2 right-auto sm:left-auto sm:right-3 flex items-center gap-1 z-10">
+                        <span class="bg-slate-900/5 text-slate-700 font-extrabold text-[10px] px-1.5 sm:px-2 py-0.5 rounded-md">#${ch.rankIndex}</span>
+                        <span class="${uiTheme.badge} text-[9px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md shrink-0">${ch.category}</span>
                     </div>
                     
-                    <div class="mt-7 ${uiTheme.bg} ${uiTheme.text} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
+                    <div class="sm:mt-7 ${uiTheme.bg} ${uiTheme.text} w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 shadow-xs group-hover:scale-105 transition-transform overflow-hidden">
                         ${avatarHTML}
                     </div>
                     
-                    <div class="flex-1 flex flex-col justify-center my-2 w-full min-w-0">
+                    <div class="flex-1 flex flex-col justify-center sm:my-2 w-full min-w-0 text-right sm:text-center pl-16 sm:pl-0">
                         <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-emerald-600 transition-colors truncate px-1">${ch.title}</h3>
                         <p class="text-slate-400 text-[11px] font-medium leading-relaxed line-clamp-2 mt-1 px-1">${ch.description}</p>
                     </div>
                     
-                    <div class="w-full flex items-center justify-between text-[11px] font-bold text-slate-400 pt-2 border-t border-slate-50">
+                    <div class="w-auto sm:w-full flex flex-col sm:flex-row items-end sm:items-center justify-center sm:justify-between text-[11px] font-bold text-slate-400 pt-0 sm:pt-2 border-t-0 sm:border-t border-slate-50 gap-1.5 sm:gap-0 shrink-0">
                         <span class="flex items-center gap-1"><i class="fa-solid fa-comments text-slate-300 text-[10px]"></i> ${ch.reviewCount}</span>
-                        <div class="flex items-center gap-1 text-amber-400 font-bold bg-amber-50/50 px-2 py-0.5 rounded-md">
+                        <div class="flex items-center gap-1 text-amber-400 font-bold bg-amber-50/50 px-2 py-0.5 rounded-md whitespace-nowrap">
                             ${ch.averageRating > 0 ? `${ch.averageRating} <i class="fa-solid fa-star text-[9px]"></i>` : `<span class="text-slate-400 text-[9px]">אין דירוג</span>`}
                         </div>
                     </div>
