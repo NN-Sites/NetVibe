@@ -291,11 +291,6 @@
                     </div>
 
                     <div>
-                        <label class="block text-slate-700 font-bold text-sm mb-2">קישור לתמונת לוגו / פרופיל (URL) <span class="text-xs font-normal text-slate-400">(אופציונלי)</span></label>
-                        <input type="url" id="form-image" placeholder="https://example.com/logo.png" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800 text-left" dir="ltr">
-                    </div>
-
-                    <div>
                         <label class="block text-slate-700 font-bold text-sm mb-2">תיאור ותוכן הערוץ *</label>
                         <textarea id="form-description" required rows="4" placeholder="תארו כאן בקצרה מה מפורסם בערוץ שלכם כדי למשוך עוקבים חדשים..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800"></textarea>
                     </div>
@@ -632,7 +627,6 @@
                 title: document.getElementById('form-title').value,
                 category: document.getElementById('form-category').value,
                 url: document.getElementById('form-url').value,
-                image: document.getElementById('form-image').value.trim(),
                 description: document.getElementById('form-description').value,
                 timestamp: Date.now()
             };
@@ -669,7 +663,6 @@
             document.getElementById('form-title').value = ch.title || '';
             document.getElementById('form-category').value = ch.category || '';
             document.getElementById('form-url').value = ch.url || '';
-            document.getElementById('form-image').value = ch.image || '';
             document.getElementById('form-description').value = ch.description || '';
 
             document.getElementById('submit-page-title').innerText = "עריכת ערוץ וואטסאפ";
