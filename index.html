@@ -291,6 +291,11 @@
                     </div>
 
                     <div>
+                        <label class="block text-slate-700 font-bold text-sm mb-2">קישור לתמונת לוגו / פרופיל (URL)</label>
+                        <input type="text" id="form-image" value="תמונת הערוץ תתעדכן בקרוב" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-500 font-semibold cursor-not-allowed focus:outline-hidden">
+                    </div>
+
+                    <div>
                         <label class="block text-slate-700 font-bold text-sm mb-2">תיאור ותוכן הערוץ *</label>
                         <textarea id="form-description" required rows="4" placeholder="תארו כאן בקצרה מה מפורסם בערוץ שלכם כדי למשוך עוקבים חדשים..." class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 text-slate-800"></textarea>
                     </div>
@@ -533,6 +538,7 @@
             if (pageId !== 'submit') {
                 editingChannelId = null;
                 document.getElementById('create-channel-form').reset();
+                document.getElementById('form-image').value = "תמונת הערוץ תתעדכן בקרוב";
                 document.getElementById('submit-page-title').innerText = "פרסום ערוץ וואטסאפ";
                 document.getElementById('submit-page-desc').innerText = "מלאו את הפרטים מטה כדי להוסיף את הערוץ שלכם לספרייה הציבורית";
                 document.getElementById('form-submit-btn').innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> פרסום הערוץ למערכת`;
@@ -627,6 +633,7 @@
                 title: document.getElementById('form-title').value,
                 category: document.getElementById('form-category').value,
                 url: document.getElementById('form-url').value,
+                image: document.getElementById('form-image').value.trim(),
                 description: document.getElementById('form-description').value,
                 timestamp: Date.now()
             };
@@ -638,12 +645,14 @@
                     const updatedId = editingChannelId;
                     editingChannelId = null;
                     document.getElementById('create-channel-form').reset();
+                    document.getElementById('form-image').value = "תמונת הערוץ תתעדכן בקרוב";
                     window.navigateToChannelDetailsViewPage(updatedId);
                 } else {
                     channelPayload.creatorUid = currentUser.uid;
                     channelPayload.isSponsored = false;
                     await addDoc(collection(db, "channels"), channelPayload);
                     document.getElementById('create-channel-form').reset();
+                    document.getElementById('form-image').value = "תמונת הערוץ תתעדכן בקרוב";
                     switchPage('home');
                 }
             } catch(err) {
@@ -663,6 +672,7 @@
             document.getElementById('form-title').value = ch.title || '';
             document.getElementById('form-category').value = ch.category || '';
             document.getElementById('form-url').value = ch.url || '';
+            document.getElementById('form-image').value = ch.image || 'תמונת הערוץ תתעדכן בקרוב';
             document.getElementById('form-description').value = ch.description || '';
 
             document.getElementById('submit-page-title').innerText = "עריכת ערוץ וואטסאפ";
